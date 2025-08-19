@@ -16,7 +16,7 @@ namespace BlackHole
 
     public class BlackHoleEngine : IDisposable
     {
-        // ==== Unchanged fields/state ====
+        // opengl bindings
         int quadVao = 0, quadVbo = 0;
         int lineVAO, lineVBO = 0;
         int pointsVAO, pointsVBO = 0;
@@ -28,19 +28,22 @@ namespace BlackHole
         int objectsUBO = 0; // binding=3
         int pathsSSBO = 0; // binding=4
 
-        const int MaxTracePaths = 5;
-        const int MaxTraceSamples = 5000;
-
-        List<System.Drawing.Point> pathTraceSeedPixels = new();
-
-        int WIDTH, HEIGHT;
+        // todo: move to gamesetup
         int COMPUTE_WIDTH = 20 * 16;
         int COMPUTE_HEIGHT = 20 * 16;
+
+        int WIDTH, HEIGHT;        
 
         CameraState camera = new();
         
         readonly GameSetup _gameSetup;
         public GameSetup GameSetup => _gameSetup;
+
+        // for visualizaing geodesics
+        const int MaxTracePaths = 5;
+        const int MaxTraceSamples = 5000;
+
+        List<System.Drawing.Point> pathTraceSeedPixels = new();
 
         private Shaders _shaders = new();
 
@@ -69,8 +72,7 @@ namespace BlackHole
         // ==== Lifecycle (was OnLoad/OnResize/OnRenderFrame/OnUnload) ====
 
         public void Load() // was: OnLoad()
-        {
-            // (Debug output kept as in your code; try-catch same)
+        {   
             var debug = false;
             if (debug)
             {
@@ -95,7 +97,7 @@ namespace BlackHole
             CreateQuadAndTexture();
             CreateBGBitmap();
 
-            // UBOs/SSBO (unchanged)
+            // UBOs/SSBO
             cameraUBO = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.UniformBuffer, cameraUBO);
             GL.BufferData(BufferTarget.UniformBuffer, 80, IntPtr.Zero, BufferUsageHint.DynamicDraw);
@@ -140,6 +142,7 @@ namespace BlackHole
         {
             if (!_isDirty)
             {
+                // I know this is wrong, but this seems to make it smoother and ligher on the GPU. Might affect vsync though
                 //System.Threading.Thread.Sleep(5);
                 return;
             }
@@ -175,7 +178,7 @@ namespace BlackHole
             _isDirty = camera.moving;
         }
 
-        public void Dispose() // was: OnUnload()
+        public void Dispose() 
         {
             _shaders.Unload();
             if (outputTex != 0) GL.DeleteTexture(outputTex);
@@ -187,7 +190,7 @@ namespace BlackHole
             if (pathsSSBO != 0) GL.DeleteBuffer(pathsSSBO);
         }
 
-        // ==== Input hooks (was event wiring) ====
+        //  Input hooks 
         public void InputMouseDown(OpenTK.Windowing.GraphicsLibraryFramework.MouseButton button)
             => camera.ProcessMouseButton(button, OpenTK.Windowing.GraphicsLibraryFramework.InputAction.Press);
 
@@ -241,9 +244,7 @@ namespace BlackHole
             GL.DispatchCompute(groupsX, groupsY, 1);
             GL.MemoryBarrier(MemoryBarrierFlags.ShaderImageAccessBarrierBit);
             GL.MemoryBarrier(MemoryBarrierFlags.ShaderStorageBarrierBit);
-            // Keep Finish during bring-up; remove later when stable
-
-
+            //  GL.Finish for debug if needed. it waits for all GL work to complete synchronously
         }
 
         void HandleGeoPaths()
