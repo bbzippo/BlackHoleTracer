@@ -13,7 +13,7 @@ Contains a ready to run VisualStuio solution.
 
 ./WpfControlUI:
 
-A slow and almost abandoned Windows implementation with an embedded GL window based on OpenTK.Wpf.GLWpfControl.
+A slow and almost abandoned Windows implementation attempt with an embedded GL window based on OpenTK.Wpf.GLWpfControl.
 Instructive, because it exposed an issue with vsync: you can't smoothly render if you don't align frame rate and refresh rate. 
 If you want to render at slow FPS, you need to skip frames in multiples of the monitor refresh rate. 
 Also, the mouse input pipeline adds latency. 
