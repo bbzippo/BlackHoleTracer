@@ -73,7 +73,7 @@ namespace BlackHole
                 );
 
             // Compute shader 
-            computeProgram = ShaderHelper.CreateComputeProgramFromFile("sw-geodesic2.js");
+            computeProgram = ShaderHelper.CreateComputeProgramFromFile("geodesicTracer.js");
         }
 
         public void SetParam(int program, string name, int val)
