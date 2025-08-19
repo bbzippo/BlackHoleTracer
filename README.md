@@ -22,9 +22,18 @@ Also, the mouse input pipeline adds latency.
 
 Ongoing. Windows UI for tweaking settings that will show side-by-side with the GL GameWindow. Hopefully will come out smoother than the Wpf-synced rendering.
 
+The whole ray tracing math is contained in the copmute shader Engine/geodesicTracer.js (js because javascript intellisense in VisualStudio works well for me with glsl).
 
-The whole ray tracing math is contained in the copmute shader Engine/geodesicTracer.js (js because javascript intellisense in VisualStudio)
-Integration in spherical coords is done by d(sin(angle)) and d(cos(angle)) rather than by d(angle). Makes it faster.
 
 BUG: The divide by zero at the diameter.
+
+Plan:
+
+Finally build UI for tweaking settings.
+Allow to change compute res on the fly.
+
+Later:
+
+Explore regularized coordinates. 
+Explore camera basis as a tetrad.
 
