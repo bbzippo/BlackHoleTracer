@@ -5,6 +5,13 @@ Inspired by and based on https://github.com/kavan010/black_hole .
 Demonstrates lensing of a disk and of the background texture.
 Has the experimental capability to visualize actual light ray geodesics.
 
+Demos
+https://www.youtube.com/watch?v=S4LQiyu3e58
+
+https://www.youtube.com/watch?v=VIHvqVwoS2o
+
+https://www.youtube.com/watch?v=4X1DmV7_zpc
+
 ./Engine:
 
 The engine and a stable cross-platform implementation using OpenTK GameWindow. No GUI or CLI for tweaking settings.
