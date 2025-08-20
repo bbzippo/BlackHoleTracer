@@ -34,11 +34,6 @@ If you want to render at slow FPS, you need to skip frames in multiples of the m
 Also, the mouse input pipeline adds latency.
 
 
-
-BUG: The divide by zero at the diameter.
-
-
-
 Plan:
 
 Finally build UI for tweaking settings.
