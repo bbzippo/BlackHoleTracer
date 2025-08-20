@@ -1,0 +1,107 @@
+﻿using OpenTK.Mathematics;
+using OpenTK.Windowing.Common;
+using OpenTK.Windowing.Desktop;
+using OpenTK.Windowing.GraphicsLibraryFramework;
+using System;
+using System.Collections.Concurrent;
+using System.Threading;
+using BlackHole;
+
+namespace BlackHoleUI
+{   
+    public static class Program
+    {
+        static volatile Action? requestCloseGw = null;
+        [STAThread]
+        public static void Main()
+        {
+            // Thread-safe queue for WPF -> GameWindow actions (run on GW thread)
+            var queue = new BlockingCollection<Action<BlackHoleEngine>>();
+            
+
+            // 1) Start WPF on its own STA thread
+            var wpfThread = new Thread(() =>
+            {
+                var app = new System.Windows.Application();
+                var win = new MainWindow(
+                    postToEngine: action => queue.Add(action),
+                    requestCloseGameWindow: () => requestCloseGw?.Invoke()  // set below after GameWindow is created
+                );
+                app.Run(win);
+            });
+            wpfThread.IsBackground = true;
+            wpfThread.SetApartmentState(ApartmentState.STA);
+            wpfThread.Start();
+
+            // 2) GameWindow ON MAIN THREAD 
+            var gws = GameWindowSettings.Default;
+            gws.UpdateFrequency = 16; 
+            var nws = new NativeWindowSettings
+            {
+                Title = "Black Hole",
+                ClientSize = new Vector2i(1600, 1200),
+                API = ContextAPI.OpenGL,
+                APIVersion = new Version(4, 3),
+                Profile = ContextProfile.Core,
+                Vsync = VSyncMode.On,
+                Flags = ContextFlags.ForwardCompatible
+            };
+
+            var gw = new GameWindow(gws, nws);
+            var host = new GameWindowHost(gw);                 
+            var engine = new BlackHoleEngine(new GameSetup(), host);
+
+            requestCloseGw = () => queue.Add(_ => gw.Close());
+            
+            gw.Load += () =>
+            {
+                engine.Load();
+                // initial window size
+                engine.Resize(gw.Size.X, gw.Size.Y);
+            };
+
+            gw.Resize += e => engine.Resize(e.Size.X, e.Size.Y);
+            gw.RenderFrame += e => engine.Render();
+            gw.MouseMove += e => engine.InputMouseMove(e.X, e.Y);
+            gw.MouseWheel += e => engine.InputMouseWheel(e.OffsetX, e.OffsetY);
+
+            gw.MouseDown += e =>
+            {
+                if (e.Action == InputAction.Press)
+                    engine.InputMouseDown(e.Button);
+            };
+            gw.MouseUp += e =>
+            {
+                if (e.Action == InputAction.Release)
+                    engine.InputMouseUp(e.Button);
+            };
+
+            gw.KeyDown += e =>
+                engine.InputKeyDown(e.Key);
+
+            int frameCount = 0;
+            //  cross-thread commands from WPF 
+            void ProcessPostedActions()
+            {
+                if (engine.IsCameraMoving || ++frameCount % 2 == 0)
+                {
+                    // Skip this frame
+                    return;
+                }
+                while (queue.TryTake(out var action))
+                    action(engine);
+            }
+
+            gw.RenderFrame += e =>
+            {
+                ProcessPostedActions();
+                engine.Render();
+            };
+
+            // When GW closes, exit process (WPF thread is background)
+            gw.Run();
+        }
+    }
+
+
+}

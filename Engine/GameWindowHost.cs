@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OpenTK.Windowing.Desktop;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,8 @@ namespace BlackHole
 {
     public class GameWindowHost : IGLHost
     {
-        private readonly OpenTK.Windowing.Desktop.GameWindow _gw;
+        private readonly GameWindow _gw;
+        public GameWindow GameWindow => _gw;
         public GameWindowHost(OpenTK.Windowing.Desktop.GameWindow gw) => _gw = gw;
         public void MakeCurrent() => _gw.MakeCurrent();
         public void SwapBuffers() => _gw.SwapBuffers();

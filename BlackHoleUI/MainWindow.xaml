@@ -5,8 +5,44 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BlackHoleUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Loaded="Window_Loaded" Closed="Window_Closed">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*"/>
+            <ColumnDefinition Width="7*"/>
+        </Grid.ColumnDefinitions>
+        
+
+        <StackPanel Grid.Column="0">
+            <TabControl>
+                <TabItem Header="Settings">
+                    <StackPanel>
+                        <TextBlock Text="Settings will go here."/>
+                        <TextBox x:Name="txtSet" Width="200" Margin="5" />
+                        <Button Content="Apply Settings" Width="100" Margin="5" Click="Button_Click"></Button>
+
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="Tweaks">
+                    <StackPanel>
+                        <TextBlock Text="Settings will go here."/>
+                        <!-- Add your settings controls here -->
+                    </StackPanel>
+                </TabItem>
+                <TabItem Header="About">
+                    <StackPanel>
+                        <TextBlock Text="Black Hole Simulation Application"/>
+                        <TextBlock Text="Version 1.0"/>
+                        <TextBlock Text="Developed by [Your Name]"/>
+                    </StackPanel>
+                </TabItem>
+            </TabControl>
+        </StackPanel>
 
     </Grid>
+
 </Window>

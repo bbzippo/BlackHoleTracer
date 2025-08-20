@@ -69,9 +69,7 @@ namespace BlackHole
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         float ScaleToShader(float meters) => meters / _gameSetup.LengthUnit;
 
-        // ==== Lifecycle (was OnLoad/OnResize/OnRenderFrame/OnUnload) ====
-
-        public void Load() // was: OnLoad()
+        public void Load() 
         {   
             var debug = false;
             if (debug)
@@ -143,7 +141,7 @@ namespace BlackHole
             if (!_isDirty)
             {
                 // I know this is wrong, but this seems to make it smoother and ligher on the GPU. Might affect vsync though
-                //System.Threading.Thread.Sleep(5);
+                System.Threading.Thread.Sleep(5);
                 return;
             }
 
@@ -176,7 +174,10 @@ namespace BlackHole
 
             _host.SwapBuffers(); // <— replaces direct SwapBuffers() call
             _isDirty = camera.moving;
+            IsCameraMoving = camera.moving;
         }
+
+        public bool IsCameraMoving = false;
 
         public void Dispose() 
         {
@@ -209,7 +210,7 @@ namespace BlackHole
             Invalidate();
         }
 
-        public void Input_KeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys key)
+        public void InputKeyDown(OpenTK.Windowing.GraphicsLibraryFramework.Keys key)
         {
             if (key == OpenTK.Windowing.GraphicsLibraryFramework.Keys.Escape)
             {

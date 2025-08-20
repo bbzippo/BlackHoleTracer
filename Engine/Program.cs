@@ -71,14 +71,9 @@ namespace BlackHole
 
             gw.KeyDown += (KeyboardKeyEventArgs e) =>
             {
-                engine.Input_KeyDown(e.Key);
+                engine.InputKeyDown(e.Key);
             };
 
-            // optional: if you use dt on CPU side
-            //gw.UpdateFrame += (FrameEventArgs e) =>
-            //{
-            //    engine.Update(e.Time);
-            //};
 
             gw.Run();
         }
