@@ -3,6 +3,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
+using System.Formats.Tar;
 using System.Runtime.Intrinsics.Arm;
 using System.Text;
 using System.Windows;
@@ -19,12 +20,12 @@ namespace BlackHoleUI
 {
     public partial class MainWindow : System.Windows.Window
     {
-        private readonly Func<GameWindowHost> _getHost; 
+        private readonly Func<GameWindowHost>? _getHost; 
         private readonly Action<Action<BlackHoleEngine>> _postToEngine; 
         volatile Action? _requestCloseGameWindow = null; 
 
         public MainWindow(
-            Func<GameWindowHost> getHost,
+            Func<GameWindowHost>? getHost,
             Action<Action<BlackHoleEngine>> postToEngine,
             Action? requestCloseGameWindow = null)
         {
@@ -38,7 +39,7 @@ namespace BlackHoleUI
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             var dpi = VisualTreeHelper.GetDpi(this);
-            var host = _getHost();
+            var host = _getHost?.Invoke();
             if (host != null)
             {   
                 this.Left = host.GameWindow.Bounds.Min.X / dpi.DpiScaleX - this.Width;
@@ -85,6 +86,44 @@ namespace BlackHoleUI
                 engine.Invalidate();
             });
 
+        }
+
+        private void btnBackgroundFile_Click(object sender, RoutedEventArgs e)
+        {
+            var fileDialog = new Microsoft.Win32.OpenFileDialog();
+            
+            if (fileDialog.ShowDialog() == true)
+            {
+                tbBackground.Text = fileDialog.FileName;
+            }
+        }
+
+        private void tbBackground_TextChanged(object sender, TextChangedEventArgs e)
+        {   
+            if (_postToEngine == null) return;
+            var s = tbBackground.Text;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.BgImage = s;
+                engine.Invalidate();
+            });
+        }
+
+        private void tbTIles_TextChanged(object sender, TextChangedEventArgs e)
+        {   
+            var s = tbTIles.Text;
+            if (!int.TryParse(s, out int t) || t < 1 || t > 8)
+            {   
+                MessageBox.Show("Number of tiles must be int from 1 to 8");
+                return;
+            }
+
+            if (_postToEngine == null) return;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.BgTiles = t;
+                engine.Invalidate();
+            });
         }
     }
 }

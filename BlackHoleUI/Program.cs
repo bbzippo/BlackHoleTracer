@@ -1,11 +1,12 @@
-﻿using OpenTK.Mathematics;
+﻿using BlackHole;
+using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using System;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using BlackHole;
 
 namespace BlackHoleUI
 {   
@@ -21,22 +22,7 @@ namespace BlackHoleUI
             // Thread-safe queue for WPF -> GameWindow actions (run on GW thread)
             var queue = new BlockingCollection<Action<BlackHoleEngine>>();
             
-            // 1) Start WPF on its own STA thread
-            var wpfThread = new Thread(() =>
-            {
-                var app = new System.Windows.Application();
-                var win = new MainWindow(
-                    getHost: () => getHost?.Invoke(),
-                    postToEngine: action => queue.Add(action),
-                    requestCloseGameWindow: () => requestCloseGw?.Invoke()  
-                );
-                app.Run(win);
-            });
-            wpfThread.IsBackground = true;
-            wpfThread.SetApartmentState(ApartmentState.STA);
-            wpfThread.Start();
-
-            // 2) GameWindow ON MAIN THREAD 
+            // GameWindow ON MAIN THREAD 
             var gws = GameWindowSettings.Default;
             gws.UpdateFrequency = 16; 
             var nws = new NativeWindowSettings
@@ -50,9 +36,9 @@ namespace BlackHoleUI
                 Flags = ContextFlags.ForwardCompatible
             };
 
-            var gw = new GameWindow(gws, nws);
+            using var gw = new GameWindow(gws, nws);
             var host = new GameWindowHost(gw);                 
-            var engine = new BlackHoleEngine(new GameSetup(), host);
+            using var engine = new BlackHoleEngine(new GameSetup(), host);
 
             requestCloseGw = () => queue.Add(_ => gw.Close());
             
@@ -66,7 +52,7 @@ namespace BlackHoleUI
             };
 
             gw.Resize += e => engine.Resize(e.Size.X, e.Size.Y);
-            gw.RenderFrame += e => engine.Render();
+
             gw.MouseMove += e => engine.InputMouseMove(e.X, e.Y);
             gw.MouseWheel += e => engine.InputMouseWheel(e.OffsetX, e.OffsetY);
 
@@ -84,18 +70,14 @@ namespace BlackHoleUI
             gw.KeyDown += e =>
                 engine.InputKeyDown(e.Key);
 
-            int frameCount = 0;
             //  cross-thread commands from WPF 
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
             void ProcessPostedActions()
-            {
-                if (engine.IsCameraMoving 
-                    //&& ++frameCount < 60
-                    
-                    )
+            {   
+                if (engine.IsCameraMoving)
                 {   
                     return;
                 }
-                frameCount = 0;
 
                 // run queued actions
                 while (queue.TryTake(out var action))
@@ -107,6 +89,21 @@ namespace BlackHoleUI
                 ProcessPostedActions();
                 engine.Render();
             };
+
+            // Start WPF on its own STA thread
+            var wpfThread = new Thread(() =>
+            {
+                var app = new System.Windows.Application();
+                var win = new MainWindow(
+                    getHost: () => getHost?.Invoke(),
+                    postToEngine: action => queue.Add(action),
+                    requestCloseGameWindow: () => requestCloseGw?.Invoke()
+                );
+                app.Run(win);
+            });
+            wpfThread.IsBackground = true;
+            wpfThread.SetApartmentState(ApartmentState.STA);
+            wpfThread.Start();
 
             // When GW closes, exit process (WPF thread is background)
             gw.Run();

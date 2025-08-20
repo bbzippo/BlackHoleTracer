@@ -42,6 +42,33 @@ namespace BlackHole
         public bool ShowBricks = true;
         public HorizonHandling HorizonHandling = HorizonHandling.Black;
 
+        private string _BgImage = "galaxy.png";
+        public string BgImage {
+            get => _BgImage;
+            set 
+            {
+                if (_BgImage != value)
+                {
+                    _BgImage = value;
+                    IsBgDirty = true;
+                }
+            }
+        }
+        private int _BgTiles = 2;
+        public int BgTiles
+        {
+            get => _BgTiles;
+            set
+            {
+                if (_BgTiles != value)
+                {
+                    _BgTiles = value;
+                    IsBgDirty = true;
+                }
+            }
+        }
+
+        internal bool IsBgDirty;
     }
 
     public enum HorizonHandling

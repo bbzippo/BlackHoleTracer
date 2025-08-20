@@ -35,7 +35,15 @@
                             <Setter Property="VerticalContentAlignment" Value="Center"/>
                         </Style>
 
+                        <Style TargetType="Button">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="3" />
+                            <Setter Property="Padding" Value="3" />
+                        </Style>
+
                         <Style TargetType="ComboBox">
+                            <Setter Property="HorizontalAlignment" Value="Left"/> 
                             <Setter Property="VerticalAlignment" Value="Center"/>
                             <Setter Property="VerticalContentAlignment" Value="Center"/>
                             <Setter Property="IsEditable" Value="False"/>
@@ -55,20 +63,27 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Target="{Binding ElementName=cbShowDisk}">Show Disk:</Label>
                     <CheckBox Grid.Row="0" Grid.Column="1" x:Name="cbShowDisk"  IsChecked="True" Click="cbShowDisk_Click"></CheckBox>
                     <Label Grid.Row="1" Grid.Column="0" Target="{Binding ElementName=cbShowBricks}">Show bricks:</Label>
                     <CheckBox Grid.Row="1" Grid.Column="1" x:Name="cbShowBricks"  IsChecked="True" Click="cbShowBricks_Click"></CheckBox>
                     <Label Grid.Row="2" Grid.Column="0" Target="{Binding ElementName=cbbHorizon}">Horizon handling:</Label>
-                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cbbHorizon" SelectedIndex="0" SelectionChanged="cbbHorizon_SelectionChanged">
+                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cbbHorizon" SelectedIndex="0" Width="200" SelectionChanged="cbbHorizon_SelectionChanged">
                         <ComboBoxItem>Black</ComboBoxItem>
                         <ComboBoxItem>Reflective</ComboBoxItem>
                         <ComboBoxItem>Transparent</ComboBoxItem>
                     </ComboBox>
-                    <Label Grid.Row="3" Grid.Column="0" Target="{Binding ElementName=cbbHorizon}">Horizon handling:</Label>
-                    <TextBox Grid.Row="3" Grid.Column="1" Text="123124"></TextBox>
-
+                    <Label Grid.Row="3" Grid.Column="0" Target="{Binding ElementName=tbBackground}">Background:</Label>
+                    <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+                        <TextBox Grid.Row="3" Grid.Column="1" x:Name="tbBackground" Text="galaxy.png" Width="100" TextChanged="tbBackground_TextChanged"></TextBox>
+                        <Button x:Name="btnBackgroundFile" Content="File..." Click="btnBackgroundFile_Click"></Button>
+                        <Label Grid.Row="4" Grid.Column="0" Target="{Binding ElementName=tbTiles}">Tiles:</Label>
+                        <TextBox Grid.Row="4" Grid.Column="1" x:Name="tbTIles" Text="2" Width="24" TextChanged="tbTIles_TextChanged"></TextBox>
+                    </StackPanel>
+                    
                 </Grid>
             </TabItem>
             <TabItem Header="Tweaks">

@@ -141,7 +141,7 @@ namespace BlackHole
             if (!_isDirty)
             {
                 // I know this is wrong, but this seems to make it smoother and ligher on the GPU. Might affect vsync though
-                System.Threading.Thread.Sleep(5);
+                //System.Threading.Thread.Sleep(5);
                 return;
             }
 
@@ -177,7 +177,7 @@ namespace BlackHole
             IsCameraMoving = camera.moving;
         }
 
-        public bool IsCameraMoving = false;
+        public volatile bool IsCameraMoving = false;
 
         public void Dispose() 
         {
@@ -225,6 +225,12 @@ namespace BlackHole
             UploadDiskUBO();
             GL.UseProgram(_shaders.computeProgram);
 
+            if (_gameSetup.IsBgDirty)
+            {
+                CreateBGBitmap();
+                _gameSetup.IsBgDirty = false;
+            }
+
             GL.ActiveTexture(TextureUnit.Texture5);
             GL.BindTexture(TextureTarget.Texture2D, envTex);
 
@@ -239,6 +245,7 @@ namespace BlackHole
 
             _shaders.SetParam(_shaders.computeProgram, "uShowBricks", _gameSetup.ShowBricks ? 1 : 0);
             _shaders.SetParam(_shaders.computeProgram, "uHorizonHandling", (int)_gameSetup.HorizonHandling);
+            _shaders.SetParam(_shaders.computeProgram, "uBgTiles", _gameSetup.BgTiles);
 
             PrepareGeoPaths();
 
@@ -505,7 +512,7 @@ namespace BlackHole
             GL.ActiveTexture(TextureUnit.Texture5);
             GL.BindTexture(TextureTarget.Texture2D, envTex);
 
-            var bmp = ImageResult.FromStream(File.OpenRead("galaxy.png"), ColorComponents.RedGreenBlueAlpha);
+            var bmp = ImageResult.FromStream(File.OpenRead(_gameSetup.BgImage), ColorComponents.RedGreenBlueAlpha);
 
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
               bmp.Width, bmp.Height, 0,
@@ -523,8 +530,9 @@ namespace BlackHole
             if (maxAniso > 0)
                 GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName)All.TextureMaxAnisotropyExt, MathF.Min(8f, maxAniso));
 
-            // Bind to compute
+            
             _shaders.SetParam(_shaders.computeProgram, "uEnvIntensity", 1.2f);
+            
         }
 
         private void UploadCameraUBO()

@@ -62,7 +62,13 @@ namespace BlackHole
                 (float)(radius * Math.Sin(e) * Math.Sin(azimuth))
             );
         }
-        public void Update() { target = Vector3.Zero; moving = dragging || panning; }
+
+        public void Update() 
+        { 
+            target = Vector3.Zero; 
+            moving = dragging || panning; 
+        }
+
         public void ProcessMouseMove(double x, double y)
         {
             float dx = (float)(x - lastX), dy = (float)(y - lastY);
@@ -72,7 +78,8 @@ namespace BlackHole
                 elevation -= dy * orbitSpeed;
                 elevation = MathHelper.Clamp((float)elevation, 0.01f, (float)Math.PI - 0.01f);
             }
-            lastX = x; lastY = y; Update();
+            lastX = x; lastY = y; 
+            Update();
         }
         public void ProcessMouseButton(MouseButton btn, InputAction action)
         {

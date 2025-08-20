@@ -49,6 +49,7 @@ uniform float uEscapeR;        // escape radius in RS, e.g. 2000
 
 uniform int uShowBricks;
 uniform int uHorizonHandling;
+uniform int uBgTiles;
 
 
 // -- End Bindings
@@ -390,7 +391,7 @@ void main()
             float u = atan(dirCurPos.z, dirCurPos.x) * (0.15915494309189535) + 0.5; // 1/(2pi)
             float v = acos(clamp(dirCurPos.y, -1.0, 1.0)) * 0.3183098861837907; // 1/pi
 
-            float uEnvTiles = 2; // how many repeats across U and V
+            float uEnvTiles = clamp(uBgTiles, 1, 8); // how many repeats across U and V
             vec2 uv = vec2(u, v) * uEnvTiles;
                 uv = fract(uv); // wrap into [0,1) : for Tiling
 
