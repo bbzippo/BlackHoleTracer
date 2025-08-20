@@ -237,6 +237,9 @@ namespace BlackHole
             _shaders.SetParam(_shaders.computeProgram, "uEscapeR", _gameSetup.EscapeR);
             _shaders.SetParam(_shaders.computeProgram, "uScaledRS", _gameSetup.RS_scaled);
 
+            _shaders.SetParam(_shaders.computeProgram, "uShowBricks", _gameSetup.ShowBricks ? 1 : 0);
+            _shaders.SetParam(_shaders.computeProgram, "uHorizonHandling", (int)_gameSetup.HorizonHandling);
+
             PrepareGeoPaths();
 
             var groupsX = Math.Max(1, (uint)Math.Ceiling(COMPUTE_WIDTH / 16.0));

@@ -5,43 +5,81 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BlackHoleUI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
-        Loaded="Window_Loaded" Closed="Window_Closed">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="3*"/>
-            <ColumnDefinition Width="7*"/>
-        </Grid.ColumnDefinitions>
         
+        SizeToContent="WidthAndHeight" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        
+        Title="MainWindow" Height="650" Width="650"
+        
+        Loaded="Window_Loaded" Closed="Window_Closed">
 
-        <StackPanel Grid.Column="0">
-            <TabControl>
-                <TabItem Header="Settings">
-                    <StackPanel>
-                        <TextBlock Text="Settings will go here."/>
-                        <TextBox x:Name="txtSet" Width="200" Margin="5" />
-                        <Button Content="Apply Settings" Width="100" Margin="5" Click="Button_Click"></Button>
+    <Grid>
+        <Grid.LayoutTransform>
+            <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+        </Grid.LayoutTransform>
+        <TabControl>
+            <TabItem Header="Settings">
+                <Grid Margin="6">
+                    <Grid.Resources>
+                        <Style TargetType="RowDefinition">
+                            <Setter Property="Height" Value="32"/>
+                        </Style>
 
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="Tweaks">
-                    <StackPanel>
-                        <TextBlock Text="Settings will go here."/>
-                        <!-- Add your settings controls here -->
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="About">
-                    <StackPanel>
-                        <TextBlock Text="Black Hole Simulation Application"/>
-                        <TextBlock Text="Version 1.0"/>
-                        <TextBlock Text="Developed by [Your Name]"/>
-                    </StackPanel>
-                </TabItem>
-            </TabControl>
-        </StackPanel>
+                        <Style TargetType="Label">
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="6"/>
+                        </Style>
+
+                        <Style TargetType="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        </Style>
+
+                        <Style TargetType="ComboBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="IsEditable" Value="False"/>
+                        </Style>
+
+                        <Style TargetType="CheckBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0" Target="{Binding ElementName=cbShowDisk}">Show Disk:</Label>
+                    <CheckBox Grid.Row="0" Grid.Column="1" x:Name="cbShowDisk"  IsChecked="True" Click="cbShowDisk_Click"></CheckBox>
+                    <Label Grid.Row="1" Grid.Column="0" Target="{Binding ElementName=cbShowBricks}">Show bricks:</Label>
+                    <CheckBox Grid.Row="1" Grid.Column="1" x:Name="cbShowBricks"  IsChecked="True" Click="cbShowBricks_Click"></CheckBox>
+                    <Label Grid.Row="2" Grid.Column="0" Target="{Binding ElementName=cbbHorizon}">Horizon handling:</Label>
+                    <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cbbHorizon" SelectedIndex="0" SelectionChanged="cbbHorizon_SelectionChanged">
+                        <ComboBoxItem>Black</ComboBoxItem>
+                        <ComboBoxItem>Reflective</ComboBoxItem>
+                        <ComboBoxItem>Transparent</ComboBoxItem>
+                    </ComboBox>
+                    <Label Grid.Row="3" Grid.Column="0" Target="{Binding ElementName=cbbHorizon}">Horizon handling:</Label>
+                    <TextBox Grid.Row="3" Grid.Column="1" Text="123124"></TextBox>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Tweaks">
+                <StackPanel>
+                    <TextBlock Text="Settings will go here."/>
+                    <!-- Add your settings controls here -->
+                </StackPanel>
+            </TabItem>
+
+        </TabControl>
+
 
     </Grid>
 

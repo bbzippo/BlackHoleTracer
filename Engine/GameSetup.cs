@@ -39,6 +39,13 @@ namespace BlackHole
         public int PathStride = 4;
 
         public bool ShowDisk = true;
+        public bool ShowBricks = true;
+        public HorizonHandling HorizonHandling = HorizonHandling.Black;
 
+    }
+
+    public enum HorizonHandling
+    {
+        Black = 0, Reflective = 1, Transparent = 2
     }
 }

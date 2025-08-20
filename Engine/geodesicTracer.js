@@ -1,4 +1,7 @@
 ﻿#version 430
+
+// -- Bindings
+
 layout(local_size_x = 16, local_size_y = 16) in;
 
 layout(binding = 0, rgba32f) writeonly uniform image2D outImage;
@@ -38,12 +41,17 @@ uniform int   uNumPaths;
 uniform ivec2 uPathPix[MAX_PATHS]; // pixel coords to trace (in compute texture space)
 uniform int   uPathStride;         // record every N integration steps (e.g., 20)
 
-// Uniforms from host
 uniform float uScaledRS;       // The Schwa radius scaled by user for num. stability. The length unit for all compute.
 float uRs = uScaledRS; //debug
 uniform int   uSteps;          // e.g. 3000..8000 when still
 uniform float uDLambdaBase;    // base step in RS units, e.g. 2e-4
 uniform float uEscapeR;        // escape radius in RS, e.g. 2000
+
+uniform int uShowBricks;
+uniform int uHorizonHandling;
+
+
+// -- End Bindings
 
 // Guards
 const float EPS_R   = 1e-19;
@@ -357,34 +365,39 @@ void main()
         prevPos = curPos;
 
         if (
-            //abs(s.r) < EPS_R
-            abs(s.r) < uRs
+            (uHorizonHandling == 2 && abs(s.r) < EPS_R) // Transparent horizon
+            || abs(s.r) < uRs
         ) {
             hitBH = true;
-            break;
+            if (uHorizonHandling != 2)
+                break;
         }
         // Bricks
-        //if ((abs(s.r - 7 * uRs) < 0.1 * uRs)
-        //    && mod(abs(s.ct - 0), 0.3) < 0.05
-        //    && mod(abs(s.cp - 1), 0.35) < 0.06)
-        //{
-        //    hitBrick = true;
-        //    //break;
-        //}
+        if (uShowBricks > 0
+            && (abs(s.r - 7 * uRs) < 0.1 * uRs)
+            && mod(abs(s.ct - 0), 0.3) < 0.05
+            && mod(abs(s.cp - 1), 0.35) < 0.06)
+        {
+            hitBrick = true;
+            //break;
+        }
 
-        // sample environment texture
-        vec3 dirCurPos = normalize(curPos);
+        // sample environment texture when the ray escapes or the BH is reflective
+        if (uHorizonHandling == 1 || s.r > uEscapeR) {
 
-        float u = atan(dirCurPos.z, dirCurPos.x) * (0.15915494309189535) + 0.5; // 1/(2pi)
-        float v = acos(clamp(dirCurPos.y, -1.0, 1.0)) * 0.3183098861837907; // 1/pi
+            vec3 dirCurPos = normalize(curPos);
 
-        float uEnvTiles = 2; // how many repeats across U and V
-        vec2 uv = vec2(u, v) * uEnvTiles;
-        uv = fract(uv); // wrap into [0,1) : for Tiling
+            float u = atan(dirCurPos.z, dirCurPos.x) * (0.15915494309189535) + 0.5; // 1/(2pi)
+            float v = acos(clamp(dirCurPos.y, -1.0, 1.0)) * 0.3183098861837907; // 1/pi
 
-        // level of detail
-        vec3 env = textureLod(uEnvTexture, uv, cam.moving == 1 ? 0.5 : 0.0).rgb;
-        textureSample = env;
+            float uEnvTiles = 2; // how many repeats across U and V
+            vec2 uv = vec2(u, v) * uEnvTiles;
+                uv = fract(uv); // wrap into [0,1) : for Tiling
+
+            // level of detail
+            vec3 env = textureLod(uEnvTexture, uv, cam.moving == 1 ? 0.5 : 0.0).rgb;
+            textureSample = env;
+        }
 
         if (s.r > uEscapeR) { 
             rayEscaped = true;
@@ -430,7 +443,6 @@ void main()
 
     }
 
-
     // Output colors
 
     vec4 brickColor = vec4(0.3, 0.5, 1.0, 0.55);
@@ -448,19 +460,23 @@ void main()
     if (hitDisk) {
         outCol += diskColor * 0.5;
     }
-    //if (hitBrick) {
-    //    outCol += diskColor *0.3;
-    //}
+    if (hitBrick) {
+        outCol += brickColor *0.3;
+    }
     if (rayEscaped) {
         outCol += outCol * 0.1;
     }
     if (hitBH) {
-        outCol += outCol * 0.2 ;
+        if (uHorizonHandling == 0)
+            outCol += bhColor;
+        else if (uHorizonHandling == 1)
+            outCol += outCol * 0.2;
+        else if (uHorizonHandling == 2)
+            outCol += outCol * 0.2;
     }    
     if (rayDiverged) {
         outCol += outCol * 0.1;
     }
-    
     
     imageStore(outImage, pix, outCol);
 

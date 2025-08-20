@@ -11,21 +11,24 @@ namespace BlackHoleUI
 {   
     public static class Program
     {
+        // for passing state between threads
         static volatile Action? requestCloseGw = null;
+        static volatile Func<GameWindowHost>? getHost = null;
+
         [STAThread]
         public static void Main()
         {
             // Thread-safe queue for WPF -> GameWindow actions (run on GW thread)
             var queue = new BlockingCollection<Action<BlackHoleEngine>>();
             
-
             // 1) Start WPF on its own STA thread
             var wpfThread = new Thread(() =>
             {
                 var app = new System.Windows.Application();
                 var win = new MainWindow(
+                    getHost: () => getHost?.Invoke(),
                     postToEngine: action => queue.Add(action),
-                    requestCloseGameWindow: () => requestCloseGw?.Invoke()  // set below after GameWindow is created
+                    requestCloseGameWindow: () => requestCloseGw?.Invoke()  
                 );
                 app.Run(win);
             });
@@ -52,6 +55,8 @@ namespace BlackHoleUI
             var engine = new BlackHoleEngine(new GameSetup(), host);
 
             requestCloseGw = () => queue.Add(_ => gw.Close());
+            
+            getHost = () => { return host; };
             
             gw.Load += () =>
             {
@@ -83,11 +88,16 @@ namespace BlackHoleUI
             //  cross-thread commands from WPF 
             void ProcessPostedActions()
             {
-                if (engine.IsCameraMoving || ++frameCount % 2 == 0)
-                {
-                    // Skip this frame
+                if (engine.IsCameraMoving 
+                    //&& ++frameCount < 60
+                    
+                    )
+                {   
                     return;
                 }
+                frameCount = 0;
+
+                // run queued actions
                 while (queue.TryTake(out var action))
                     action(engine);
             }
