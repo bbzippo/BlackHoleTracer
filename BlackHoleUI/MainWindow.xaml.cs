@@ -125,5 +125,28 @@ namespace BlackHoleUI
                 engine.Invalidate();
             });
         }
+
+        private void txtCompW_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (txtCompW == null || txtCompH == null) return;
+
+            if (!int.TryParse(txtCompW.Text, out int w) || w < 1 || w > 2000)
+            {
+                MessageBox.Show("Bad compute width");
+                return;
+            }
+            if (!int.TryParse(txtCompH.Text, out int h) || h < 1 || h > 2000)
+            {
+                MessageBox.Show("Bad compute height");
+                return;
+            }
+            if (_postToEngine == null) return;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.ComputeWidth = w;
+                engine.GameSetup.ComputeHeight = h;
+                engine.Invalidate();
+            });
+        }
     }
 }

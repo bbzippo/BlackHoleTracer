@@ -2,7 +2,7 @@
 
 // -- Bindings
 
-layout(local_size_x = 16, local_size_y = 16) in;
+layout(local_size_x = 8, local_size_y = 4) in;
 
 layout(binding = 0, rgba32f) writeonly uniform image2D outImage;
 
@@ -396,8 +396,9 @@ void main()
                 uv = fract(uv); // wrap into [0,1) : for Tiling
 
             // level of detail
-            vec3 env = textureLod(uEnvTexture, uv, cam.moving == 1 ? 0.5 : 0.0).rgb;
+            vec3 env = textureLod(uEnvTexture, uv, cam.moving == 1 ? 1.0 : 0.0).rgb; //blur bg details when moving - much smoother
             textureSample = env;
+            
         }
 
         if (s.r > uEscapeR) { 

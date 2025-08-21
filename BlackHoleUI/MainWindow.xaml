@@ -6,9 +6,9 @@
         xmlns:local="clr-namespace:BlackHoleUI"
         mc:Ignorable="d"
         
-        SizeToContent="WidthAndHeight" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        SizeToContent="Manual" UseLayoutRounding="True" SnapsToDevicePixels="True"
         
-        Title="MainWindow" Height="650" Width="650"
+        Title="MainWindow" Height="400" Width="500"
         
         Loaded="Window_Loaded" Closed="Window_Closed">
 
@@ -43,7 +43,7 @@
                         </Style>
 
                         <Style TargetType="ComboBox">
-                            <Setter Property="HorizontalAlignment" Value="Left"/> 
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
                             <Setter Property="VerticalAlignment" Value="Center"/>
                             <Setter Property="VerticalContentAlignment" Value="Center"/>
                             <Setter Property="IsEditable" Value="False"/>
@@ -83,14 +83,63 @@
                         <Label Grid.Row="4" Grid.Column="0" Target="{Binding ElementName=tbTiles}">Tiles:</Label>
                         <TextBox Grid.Row="4" Grid.Column="1" x:Name="tbTIles" Text="2" Width="24" TextChanged="tbTIles_TextChanged"></TextBox>
                     </StackPanel>
-                    
+
                 </Grid>
             </TabItem>
             <TabItem Header="Tweaks">
-                <StackPanel>
-                    <TextBlock Text="Settings will go here."/>
-                    <!-- Add your settings controls here -->
-                </StackPanel>
+                <Grid Margin="6">
+                    <Grid.Resources>
+                        <Style TargetType="RowDefinition">
+                            <Setter Property="Height" Value="32"/>
+                        </Style>
+
+                        <Style TargetType="Label">
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Padding" Value="6"/>
+                        </Style>
+
+                        <Style TargetType="TextBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        </Style>
+
+                        <Style TargetType="Button">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="Margin" Value="3" />
+                            <Setter Property="Padding" Value="3" />
+                        </Style>
+
+                        <Style TargetType="ComboBox">
+                            <Setter Property="HorizontalAlignment" Value="Left"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                            <Setter Property="IsEditable" Value="False"/>
+                        </Style>
+
+                        <Style TargetType="CheckBox">
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label Grid.Row="0" Grid.Column="0">Compute Width</Label>
+                    <TextBox x:Name="txtCompW" Grid.Row="0" Grid.Column="1" Text="380" LostFocus="txtCompW_LostFocus"></TextBox>
+                    <Label Grid.Row="1" Grid.Column="0">Compute Height</Label>
+                    <TextBox x:Name="txtCompH" Grid.Row="1" Grid.Column="1" Text="380" LostFocus="txtCompW_LostFocus"></TextBox>
+                </Grid>
             </TabItem>
 
         </TabControl>

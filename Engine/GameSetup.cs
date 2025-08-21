@@ -68,7 +68,37 @@ namespace BlackHole
             }
         }
 
+        private int _ComputeWidth = 380;
+        public int ComputeWidth
+        {
+            get => _ComputeWidth;
+            set
+            {
+                if (_ComputeWidth != value)
+                {
+                    _ComputeWidth = value;
+                    IsSizeDirty = true;
+                }
+            }
+        }
+
+        private int _ComputeHeight = 380;
+        public int ComputeHeight
+        {
+            get => _ComputeHeight;
+            set
+            {
+                if (_ComputeHeight != value)
+                {
+                    _ComputeHeight = value;
+                    IsSizeDirty = true;
+                }
+            }
+        }
+
+        internal bool IsSizeDirty;
         internal bool IsBgDirty;
+
     }
 
     public enum HorizonHandling

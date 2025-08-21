@@ -28,10 +28,6 @@ namespace BlackHole
         int objectsUBO = 0; // binding=3
         int pathsSSBO = 0; // binding=4
 
-        // todo: move to gamesetup
-        int COMPUTE_WIDTH = 20 * 16;
-        int COMPUTE_HEIGHT = 20 * 16;
-
         int WIDTH, HEIGHT;        
 
         CameraState camera = new();
@@ -225,14 +221,17 @@ namespace BlackHole
             UploadDiskUBO();
             GL.UseProgram(_shaders.computeProgram);
 
-            if (_gameSetup.IsBgDirty)
+            if (_gameSetup.IsSizeDirty)
             {
-                CreateBGBitmap();
-                _gameSetup.IsBgDirty = false;
+                UpdateOutputTexture();
+                _gameSetup.IsSizeDirty = false;
             }
 
-            GL.ActiveTexture(TextureUnit.Texture5);
-            GL.BindTexture(TextureTarget.Texture2D, envTex);
+            if (_gameSetup.IsBgDirty)
+            {
+                LoadBGBitmap();
+                _gameSetup.IsBgDirty = false;
+            }
 
             GL.BindImageTexture(0, outputTex, 0, false, 0, TextureAccess.WriteOnly, SizedInternalFormat.Rgba32f);
 
@@ -249,13 +248,13 @@ namespace BlackHole
 
             PrepareGeoPaths();
 
-            var groupsX = Math.Max(1, (uint)Math.Ceiling(COMPUTE_WIDTH / 16.0));
-            var groupsY = Math.Max(1, (uint)Math.Ceiling(COMPUTE_HEIGHT / 16.0));
+            var groupsX = Math.Max(1, (uint)Math.Ceiling(_gameSetup.ComputeWidth / 8.0));
+            var groupsY = Math.Max(1, (uint)Math.Ceiling(_gameSetup.ComputeHeight / 4.0));
 
             GL.DispatchCompute(groupsX, groupsY, 1);
             GL.MemoryBarrier(MemoryBarrierFlags.ShaderImageAccessBarrierBit);
             GL.MemoryBarrier(MemoryBarrierFlags.ShaderStorageBarrierBit);
-            //  GL.Finish for debug if needed. it waits for all GL work to complete synchronously
+            //GL.Finish(); // for debug if needed. it waits for all GL work to complete synchronously
         }
 
         void HandleGeoPaths()
@@ -348,7 +347,6 @@ namespace BlackHole
         {
             GL.UseProgram(_shaders.pointProgram);
 
-            // Robust basis (same as your compute UBO)
             Vector3 fwd = camera.target - camera.Position();
             if (fwd.LengthSquared < 1e-12f)
             {
@@ -380,17 +378,13 @@ namespace BlackHole
 
             GL.BindVertexArray(pointsVAO);
 
-            // Single draw for all points:
-            //GL.DrawArrays(PrimitiveType.Points, 0, allPointsRS.Count);
-
-            // Or per-path with different colors 
 
             int start = 0;
             for (int p = 0; p < pathCounts.Count; ++p)
             {
                 int n = pathCounts[p];
                 if (n <= 0) continue;
-                // set color per path if you like
+                // set color per path?
                 GL.DrawArrays(PrimitiveType.Points, start, n - 1);
                 start += n;
             }
@@ -447,7 +441,7 @@ namespace BlackHole
             pathTraceSeedPixels = [];
             foreach (var dir in desiredDirs)
             {
-                if (camera.WorldDirToComputePixel(dir, COMPUTE_WIDTH, COMPUTE_HEIGHT, out var xi, out var yi, out var behind))
+                if (camera.WorldDirToComputePixel(dir, _gameSetup.ComputeWidth, _gameSetup.ComputeHeight, out var xi, out var yi, out var behind))
                 {
                     pathTraceSeedPixels.Add(new(xi, yi));
                 }
@@ -496,43 +490,54 @@ namespace BlackHole
 
             // output texture for the compute shader
             outputTex = GL.GenTexture();
-            GL.BindTexture(TextureTarget.Texture2D, outputTex);
+            UpdateOutputTexture();
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f,
-                Math.Max(1, COMPUTE_WIDTH), Math.Max(1, COMPUTE_HEIGHT),
+                Math.Max(1, _gameSetup.ComputeWidth), Math.Max(1, _gameSetup.ComputeHeight),
                 0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.BindVertexArray(0);
         }
 
+        private void UpdateOutputTexture()
+        {
+            GL.BindTexture(TextureTarget.Texture2D, outputTex);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba32f,
+                Math.Max(1, _gameSetup.ComputeWidth), Math.Max(1, _gameSetup.ComputeHeight),
+                0, PixelFormat.Rgba, PixelType.Float, IntPtr.Zero);
+        }
+
         private void CreateBGBitmap()
         {
             envTex = GL.GenTexture();
-            GL.ActiveTexture(TextureUnit.Texture5);
-            GL.BindTexture(TextureTarget.Texture2D, envTex);
-
-            var bmp = ImageResult.FromStream(File.OpenRead(_gameSetup.BgImage), ColorComponents.RedGreenBlueAlpha);
-
-            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-              bmp.Width, bmp.Height, 0,
-              PixelFormat.Rgba, PixelType.UnsignedByte, bmp.Data);
-
-            // Mipmaps & filtering
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            LoadBGBitmap();
+            
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.LinearMipmapLinear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
 
             // Optional anisotropy
-            GL.GetFloat((GetPName)All.TextureMaxAnisotropyExt, out float maxAniso);
-            if (maxAniso > 0)
-                GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName)All.TextureMaxAnisotropyExt, MathF.Min(8f, maxAniso));
+            //GL.GetFloat((GetPName)All.TextureMaxAnisotropyExt, out float maxAniso);
+            //if (maxAniso > 0)
+            //    GL.TexParameter(TextureTarget.Texture2D, (TextureParameterName)All.TextureMaxAnisotropyExt, MathF.Min(8f, maxAniso));
 
-            
             _shaders.SetParam(_shaders.computeProgram, "uEnvIntensity", 1.2f);
+        }
+
+        private void LoadBGBitmap()
+        {
+            GL.ActiveTexture(TextureUnit.Texture5);
+            GL.BindTexture(TextureTarget.Texture2D, envTex);
             
+            var bmp = ImageResult.FromStream(File.OpenRead(_gameSetup.BgImage), ColorComponents.RedGreenBlueAlpha);
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
+              bmp.Width, bmp.Height, 0,
+              PixelFormat.Rgba, PixelType.UnsignedByte, bmp.Data);
+
+            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
 
         private void UploadCameraUBO()
