@@ -8,7 +8,7 @@
         
         SizeToContent="Manual" UseLayoutRounding="True" SnapsToDevicePixels="True"
         
-        Title="MainWindow" Height="400" Width="500"
+        Title="MainWindow" Height="384" Width="436"
         
         Loaded="Window_Loaded" Closed="Window_Closed">
 
@@ -65,11 +65,13 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0" Target="{Binding ElementName=cbShowDisk}">Show Disk:</Label>
                     <CheckBox Grid.Row="0" Grid.Column="1" x:Name="cbShowDisk"  IsChecked="True" Click="cbShowDisk_Click"></CheckBox>
-                    <Label Grid.Row="1" Grid.Column="0" Target="{Binding ElementName=cbShowBricks}">Show bricks:</Label>
+                    <Label Grid.Row="1" Grid.Column="0" Target="{Binding ElementName=cbShowBricks}">Show reference bricks:</Label>
                     <CheckBox Grid.Row="1" Grid.Column="1" x:Name="cbShowBricks"  IsChecked="True" Click="cbShowBricks_Click"></CheckBox>
+                    
                     <Label Grid.Row="2" Grid.Column="0" Target="{Binding ElementName=cbbHorizon}">Horizon handling:</Label>
                     <ComboBox Grid.Row="2" Grid.Column="1" x:Name="cbbHorizon" SelectedIndex="0" Width="200" SelectionChanged="cbbHorizon_SelectionChanged">
                         <ComboBoxItem>Black</ComboBoxItem>
@@ -78,10 +80,10 @@
                     </ComboBox>
                     <Label Grid.Row="3" Grid.Column="0" Target="{Binding ElementName=tbBackground}">Background:</Label>
                     <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                        <TextBox Grid.Row="3" Grid.Column="1" x:Name="tbBackground" Text="galaxy.png" Width="100" TextChanged="tbBackground_TextChanged"></TextBox>
+                        <TextBox x:Name="tbBackground" Text="galaxy.png" Width="100" LostFocus="tbBackground_LostFocus" ></TextBox>
                         <Button x:Name="btnBackgroundFile" Content="File..." Click="btnBackgroundFile_Click"></Button>
-                        <Label Grid.Row="4" Grid.Column="0" Target="{Binding ElementName=tbTiles}">Tiles:</Label>
-                        <TextBox Grid.Row="4" Grid.Column="1" x:Name="tbTIles" Text="2" Width="24" TextChanged="tbTIles_TextChanged"></TextBox>
+                        <Label Target="{Binding ElementName=tbTiles}">Tiles:</Label>
+                        <TextBox x:Name="tbTIles" Text="2" Width="24" LostFocus="tbTIles_LostFocus" ></TextBox>
                     </StackPanel>
 
                 </Grid>
@@ -134,11 +136,20 @@
                         <RowDefinition/>
                         <RowDefinition/>
                         <RowDefinition/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
                     <Label Grid.Row="0" Grid.Column="0">Compute Width</Label>
                     <TextBox x:Name="txtCompW" Grid.Row="0" Grid.Column="1" Text="380" LostFocus="txtCompW_LostFocus"></TextBox>
                     <Label Grid.Row="1" Grid.Column="0">Compute Height</Label>
                     <TextBox x:Name="txtCompH" Grid.Row="1" Grid.Column="1" Text="380" LostFocus="txtCompW_LostFocus"></TextBox>
+                    <Label Grid.Row="2" Grid.Column="0">Integration Steps</Label>
+                    <TextBox x:Name="txtSteps" Grid.Row="2" Grid.Column="1" Text="8000" LostFocus="txtSteps_LostFocus"></TextBox>
+                    <Label Grid.Row="3" Grid.Column="0">Integration Resolution</Label>
+                    <TextBox x:Name="txtRes" Grid.Row="3" Grid.Column="1" Text="0.003" LostFocus="txtRes_LostFocus"></TextBox>
+                    <Label Grid.Row="4" Grid.Column="0">Ray Escape distance</Label>
+                    <TextBox x:Name="txtEscapeR" Grid.Row="4" Grid.Column="1" Text="40" LostFocus="txtEscapeR_LostFocus"></TextBox>
+
+                    <Button Grid.Column="0" Grid.Row="6" x:Name="btnDefaultTweaks" Content="Safe defaults" Click="btnDefaultTweaks_Click"></Button>
                 </Grid>
             </TabItem>
 

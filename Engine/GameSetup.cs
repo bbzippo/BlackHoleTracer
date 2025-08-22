@@ -20,20 +20,24 @@ namespace BlackHole
             RS = 2.0f * G_newton * SagAMass / (c_light * c_light);
             LengthUnit = RS * 1e-3f;
             RS_scaled = RS / LengthUnit;
-            AffineStep = 0.003f * RS_scaled;
-            EscapeR = 40 * RS_scaled;
-
-            IntegrationStepsMoving = IntegrationStepsStill;
         }
 
         public float LengthUnit;
         public float RS;
         public float RS_scaled;
 
-        public int IntegrationStepsStill = 8000;
-        public int IntegrationStepsMoving;
-        public float EscapeR;
-        public float AffineStep;
+
+        public const int IntegrationStepsDefault = 8000;
+        public const float EscapeDistanceDefaut = 40;
+        public const float ResolutionDefault = 0.003f;
+
+        public int IntegrationStepsStill = IntegrationStepsDefault;
+        public int IntegrationStepsMoving => (int)(IntegrationStepsStill / 1.25);
+        public float EscapeDistance = EscapeDistanceDefaut;
+        public float Resolution = ResolutionDefault;
+        public float EscapeR => EscapeDistance * RS_scaled;
+        public float AffineStep => Resolution * RS_scaled;
+
 
         public bool EnablePaths = false;
         public int PathStride = 4;
@@ -68,7 +72,8 @@ namespace BlackHole
             }
         }
 
-        private int _ComputeWidth = 380;
+        public const int ComputeWidthDefault = 380;
+        private int _ComputeWidth = ComputeWidthDefault;
         public int ComputeWidth
         {
             get => _ComputeWidth;
@@ -81,8 +86,8 @@ namespace BlackHole
                 }
             }
         }
-
-        private int _ComputeHeight = 380;
+        public const int ComputeHeightDefault = 380;
+        private int _ComputeHeight = ComputeHeightDefault;
         public int ComputeHeight
         {
             get => _ComputeHeight;
@@ -96,10 +101,20 @@ namespace BlackHole
             }
         }
 
+        public void SetDefaults()
+        {
+            EscapeDistance = EscapeDistanceDefaut;
+            Resolution = ResolutionDefault;
+            IntegrationStepsStill = IntegrationStepsDefault;
+            ComputeWidth = ComputeWidthDefault;
+            ComputeHeight = ComputeHeightDefault;
+        }
+
         internal bool IsSizeDirty;
         internal bool IsBgDirty;
 
     }
+
 
     public enum HorizonHandling
     {

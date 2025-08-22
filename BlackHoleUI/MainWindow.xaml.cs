@@ -74,7 +74,7 @@ namespace BlackHoleUI
                 engine.Invalidate();
             });
         }
-
+        
         private void cbbHorizon_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_postToEngine == null) return;
@@ -95,35 +95,8 @@ namespace BlackHoleUI
             if (fileDialog.ShowDialog() == true)
             {
                 tbBackground.Text = fileDialog.FileName;
+                tbBackground_LostFocus(this, e);
             }
-        }
-
-        private void tbBackground_TextChanged(object sender, TextChangedEventArgs e)
-        {   
-            if (_postToEngine == null) return;
-            var s = tbBackground.Text;
-            _postToEngine(engine =>
-            {
-                engine.GameSetup.BgImage = s;
-                engine.Invalidate();
-            });
-        }
-
-        private void tbTIles_TextChanged(object sender, TextChangedEventArgs e)
-        {   
-            var s = tbTIles.Text;
-            if (!int.TryParse(s, out int t) || t < 1 || t > 8)
-            {   
-                MessageBox.Show("Number of tiles must be int from 1 to 8");
-                return;
-            }
-
-            if (_postToEngine == null) return;
-            _postToEngine(engine =>
-            {
-                engine.GameSetup.BgTiles = t;
-                engine.Invalidate();
-            });
         }
 
         private void txtCompW_LostFocus(object sender, RoutedEventArgs e)
@@ -145,6 +118,96 @@ namespace BlackHoleUI
             {
                 engine.GameSetup.ComputeWidth = w;
                 engine.GameSetup.ComputeHeight = h;
+                engine.Invalidate();
+            });
+        }
+
+        private void tbBackground_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (_postToEngine == null) return;
+            var s = tbBackground.Text;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.BgImage = s;
+                engine.Invalidate();
+            });
+        }
+
+        private void tbTIles_LostFocus(object sender, RoutedEventArgs e)
+        {
+            var s = tbTIles.Text;
+            if (!int.TryParse(s, out int t) || t < 1 || t > 8)
+            {
+                MessageBox.Show("Number of tiles must be int from 1 to 8");
+                return;
+            }
+
+            if (_postToEngine == null) return;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.BgTiles = t;
+                engine.Invalidate();
+            });
+        }
+
+        private void txtSteps_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!int.TryParse(txtSteps.Text, out int steps))
+            {
+                MessageBox.Show("Bad number");
+                return;
+            }
+            if (_postToEngine == null) return;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.IntegrationStepsStill = steps;
+                engine.Invalidate();
+            });
+
+        }
+
+        private void txtRes_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!float.TryParse(txtRes.Text, out var res))
+            {
+                MessageBox.Show("Bad number");
+                return;
+            }
+            if (_postToEngine == null) return;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.Resolution = res;
+                engine.Invalidate();
+            });
+        }
+
+        private void txtEscapeR_LostFocus(object sender, RoutedEventArgs e)
+        {
+            if (!float.TryParse(txtEscapeR.Text, out var esc))
+            {
+                MessageBox.Show("Bad number");
+                return;
+            }
+            if (_postToEngine == null) return;
+            _postToEngine(engine =>
+            {
+                engine.GameSetup.EscapeDistance = esc;
+                engine.Invalidate();
+            });
+        }
+
+        private void btnDefaultTweaks_Click(object sender, RoutedEventArgs e)
+        {
+            txtCompH.Text = GameSetup.ComputeHeightDefault.ToString();
+            txtCompW.Text = GameSetup.ComputeWidthDefault.ToString();
+            txtEscapeR.Text = GameSetup.EscapeDistanceDefaut.ToString();
+            txtRes.Text = GameSetup.ResolutionDefault.ToString();
+            txtSteps.Text = GameSetup.IntegrationStepsDefault.ToString();
+
+            if (_postToEngine == null) return;
+            _postToEngine(engine =>
+            {   
+                engine.GameSetup.SetDefaults();
                 engine.Invalidate();
             });
         }

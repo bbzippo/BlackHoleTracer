@@ -93,8 +93,9 @@ namespace BlackHole
                 else if (action == InputAction.Release) 
                 { 
                     dragging = false; 
-                    panning = false; 
+                    panning = false;
                 }
+                Update();
             }
         }
         public void ProcessScroll(double xoff, double yoff)

@@ -9,6 +9,7 @@ namespace BlackHole
     using BlackHole;
     using OpenTK.Graphics.OpenGL;
     using OpenTK.Mathematics;
+    using StbImageResizeSharp;
     using StbImageSharp;
     using System.Diagnostics;
     using System.Runtime.CompilerServices;
@@ -145,7 +146,7 @@ namespace BlackHole
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            // geo paths — unchanged
+            // geo paths
             GL.BindBuffer(BufferTarget.ShaderStorageBuffer, pathsSSBO);
             int countsOffset = (4 * sizeof(float)) * MaxTracePaths * MaxTraceSamples;
             GL.ClearBufferSubData(BufferTarget.ShaderStorageBuffer,
@@ -155,7 +156,7 @@ namespace BlackHole
 
             DispatchCompute();
 
-            // background blit — unchanged
+            // background blit 
             GL.UseProgram(_shaders.screenProgram);
             GL.ActiveTexture(TextureUnit.Texture0);
             GL.BindTexture(TextureTarget.Texture2D, outputTex);
@@ -168,7 +169,7 @@ namespace BlackHole
 
             HandleGeoPaths();
 
-            _host.SwapBuffers(); // <— replaces direct SwapBuffers() call
+            _host.SwapBuffers(); 
             _isDirty = camera.moving;
             IsCameraMoving = camera.moving;
         }
@@ -248,8 +249,8 @@ namespace BlackHole
 
             PrepareGeoPaths();
 
-            var groupsX = Math.Max(1, (uint)Math.Ceiling(_gameSetup.ComputeWidth / 8.0));
-            var groupsY = Math.Max(1, (uint)Math.Ceiling(_gameSetup.ComputeHeight / 4.0));
+            var groupsX = Math.Max(1, (uint)Math.Ceiling(_gameSetup.ComputeWidth / 16.0));
+            var groupsY = Math.Max(1, (uint)Math.Ceiling(_gameSetup.ComputeHeight / 16.0));
 
             GL.DispatchCompute(groupsX, groupsY, 1);
             GL.MemoryBarrier(MemoryBarrierFlags.ShaderImageAccessBarrierBit);
@@ -530,12 +531,22 @@ namespace BlackHole
         {
             GL.ActiveTexture(TextureUnit.Texture5);
             GL.BindTexture(TextureTarget.Texture2D, envTex);
-            
-            var bmp = ImageResult.FromStream(File.OpenRead(_gameSetup.BgImage), ColorComponents.RedGreenBlueAlpha);
+
+            ImageResult img;
+            using (var fs = File.OpenRead(_gameSetup.BgImage))
+                img = ImageResult.FromStream(fs, ColorComponents.RedGreenBlueAlpha);
+
+            int srcW = img.Width, srcH = img.Height;
+            int channels = 4; // RGBA
+            int dstW = WIDTH / _gameSetup.BgTiles, dstH = srcH * dstW / srcW;
+            var dst = new byte[dstW * dstH * channels];
+            StbImageResize.stbir_resize_uint8(
+                img.Data, srcW, srcH, srcW * channels,
+                dst, dstW, dstH, dstW * channels,
+                channels);
 
             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
-              bmp.Width, bmp.Height, 0,
-              PixelFormat.Rgba, PixelType.UnsignedByte, bmp.Data);
+              dstW, dstH, 0, PixelFormat.Rgba, PixelType.UnsignedByte, dst);
 
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
         }
