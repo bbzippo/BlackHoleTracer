@@ -1,7 +1,7 @@
 C# and OpenTK
 
 Raytracing around a blackhole in the honest Schwarzschild metric using Runge-Kutta 4.
-Inspired by and based on https://github.com/kavan010/black_hole .
+Inspired by and based on https://github.com/kavan010/black\_hole .
 Demonstrates lensing of a disk and of the background texture.
 Has the experimental capability to visualize actual light ray geodesics.
 
@@ -13,7 +13,8 @@ https://www.youtube.com/watch?v=S4LQiyu3e58
 
 https://www.youtube.com/watch?v=VIHvqVwoS2o
 
-https://www.youtube.com/watch?v=4X1DmV7_zpc
+https://www.youtube.com/watch?v=4X1DmV7\_zpc
+
 
 
 ./Engine:
@@ -25,7 +26,8 @@ Contains a ready to run VisualStuio solution.
 
 ./BlackHoleUI:
 
-Ongoing. Windows UI for tweaking settings that shows side-by-side with the GL GameWindow. 
+Windows UI for tweaking settings that shows side-by-side with the GL GameWindow.
+
 
 
 ./WpfControlUI:
@@ -36,15 +38,6 @@ If you want to render at slow FPS, you need to skip frames in multiples of the m
 Also, the mouse input pipeline adds latency.
 
 
-Plan:
-
-Finally build UI for tweaking settings.
-Allow to change compute res on the fly.
 
 
-
-Later:
-
-Explore regularized coordinates.
-Explore camera basis as a tetrad.
 
